@@ -285,9 +285,14 @@ public class TextFieldMapper extends FieldMapper {
         @Override
         public IndexFieldData.Builder fielddataBuilder() {
             if (fielddata == false) {
-                throw new IllegalArgumentException("Fielddata is disabled on text fields by default. Set fielddata=true on [" + name()
+                if (name().keyword exists) { //pseudo-code; unsure about how to actually do the check
+                    throw new IllegalArgumentException("Fielddata is disabled on text fields by default. Consider using [" + name()
+                        + ".keyword] with doc_values enabled instead for aggregations, sorting, or in a script.");
+                } else {
+                    throw new IllegalArgumentException("Fielddata is disabled on text fields by default. Set fielddata=true on [" + name()
                         + "] in order to load fielddata in memory by uninverting the inverted index. Note that this can however "
                         + "use significant memory.");
+                }
             }
             return new PagedBytesIndexFieldData.Builder(fielddataMinFrequency, fielddataMaxFrequency, fielddataMinSegmentSize);
         }
